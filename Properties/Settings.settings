@@ -1,0 +1,30 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="stickme.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="closedImage" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">closed.png</Value>
+    </Setting>
+    <Setting Name="twentyImage" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">20.png</Value>
+    </Setting>
+    <Setting Name="fourtyImage" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">40.png</Value>
+    </Setting>
+    <Setting Name="sixtyImage" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">60.png</Value>
+    </Setting>
+    <Setting Name="eightyImage" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">80.png</Value>
+    </Setting>
+    <Setting Name="openImage" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">100.png</Value>
+    </Setting>
+    <Setting Name="pttButton" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Middle</Value>
+    </Setting>
+    <Setting Name="enablePtt" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
