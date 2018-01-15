@@ -23,8 +23,7 @@ namespace stickme
         WaveInEvent audioIn = new WaveInEvent();
         byte[] levels = new byte[6];
         List<double> samples = new List<double>();
-        double maxDB = 0.0;
-        double min = 70.0;
+        double dynamicMaxDB = 0.0;
 
         // keyboard/mouse events
         IKeyboardMouseEvents me;
@@ -44,14 +43,7 @@ namespace stickme
             faces[5] = resize(Image.FromFile(Properties.Settings.Default.openImage), 640, 360);
             pbOne.Image = faces[0];
 
-            // numbers chosen arbitrarily based on testing
-            // once in place recalculated on the fly
-            levels[0] = 70;
-            levels[1] = 78;
-            levels[2] = 84;
-            levels[3] = 90;
-            levels[4] = 96;
-            levels[5] = 102;
+            calcRange(Properties.Settings.Default.dbFloor, Properties.Settings.Default.dbMax);
 
             // subscribe to device
             audioIn.DataAvailable += AudioIn_DataAvailable;
@@ -139,7 +131,7 @@ namespace stickme
                 samples.RemoveAt(0);
             }
             var adjustedDB = Convert.ToInt32(100 + samples.Average());
-            maxDB = adjustedDB > maxDB ? adjustedDB : maxDB;
+            dynamicMaxDB = adjustedDB > dynamicMaxDB ? adjustedDB : dynamicMaxDB;
 
             try
             {
@@ -164,6 +156,16 @@ namespace stickme
         }
         #endregion
 
+        private void calcRange(double floor, double ceil)
+        {
+            var range = ceil - floor;// dynamicMaxDB - Properties.Settings.Default.dbFloor;
+            var step = range / 5.0;
+            for (int x = 1; x < 6; x++)
+            {
+                levels[x] = Convert.ToByte(Math.Floor(floor + (step * x)));
+            }
+        }
+
         private void startListening()
         {
             audioIn.StartRecording();
@@ -173,16 +175,13 @@ namespace stickme
         {
             audioIn.StopRecording();
             pbOne.Image = faces[0];
-
-            // recalculate levels based on highest previous recorded DB
-            // should help with variance due to things like mic position
-            var range = maxDB - min;
-            var step = range / 5.0;
-            for (int x = 1; x < 6; x++)
+            
+            if(Properties.Settings.Default.dynamicMax)
             {
-                levels[x] = Convert.ToByte(Math.Floor(min + (step * x)));
+                // recalculate levels based on highest previous recorded DB
+                calcRange(Properties.Settings.Default.dbFloor, dynamicMaxDB);
+                dynamicMaxDB = 0.0;
             }
-            maxDB = 0.0;
         }
 
         // shamelessly stolen from SO
