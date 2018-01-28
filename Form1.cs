@@ -18,6 +18,8 @@ namespace stickme
     {
         // images
         Image[] faces = new Image[6];
+        List<Tuple<Keys, Image>> animations = new List<Tuple<Keys, Image>>();
+        Timer animation = new Timer();
 
         // audio data
         WaveInEvent audioIn = new WaveInEvent();
@@ -66,14 +68,39 @@ namespace stickme
                 }
             }
 
+            animation.Interval = 5000;
+            animation.Tick += Animation_Tick;
+        }
+
+        private void setFace(int index)
+        {
+            if(!animation.Enabled)
+            {
+                pbOne.Image = faces[index];
+            }
+        }
+
+        private void setFace(Tuple<Keys, Image> face)
+        {
+            pbOne.Image = face.Item2;
+            animation.Start();
         }
 
         #region event handling
+        private void Animation_Tick(object sender, EventArgs e)
+        {
+            animation.Stop();
+        }
+
         private void Me_KeyDown(object sender, KeyEventArgs e)
         {
             if(e.KeyData == keyboardPTT)
             {
                 startListening();
+            }
+            if(animations.Any(ax => ax.Item1 == e.KeyData))
+            {
+                setFace(animations.First(ax => ax.Item1 == e.KeyData));
             }
         }
 
@@ -137,13 +164,13 @@ namespace stickme
             {
                 if (adjustedDB <= levels[0])
                 {
-                    pbOne.Image = faces[0];
+                    this.setFace(0);
                 }
                 for (int x = 1; x < levels.Length; x++)
                 {
                     if (adjustedDB <= levels[x] && adjustedDB > levels[x - 1])
                     {
-                        pbOne.Image = faces[x];
+                        this.setFace(x);
                     }
                 }
             }
