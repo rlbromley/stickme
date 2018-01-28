@@ -23,7 +23,7 @@ namespace stickme
         WaveInEvent audioIn = new WaveInEvent();
         byte[] levels = new byte[6];
         List<double> samples = new List<double>();
-        double dynamicMaxDB = 0.0;
+        double dynamicMaxDB = double.NegativeInfinity;
 
         // keyboard/mouse events
         IKeyboardMouseEvents me;
@@ -130,6 +130,7 @@ namespace stickme
                 // pop the oldest sample out of the list
                 samples.RemoveAt(0);
             }
+            // still not sure how to fix the math to not require an arbitrary 100 here
             var adjustedDB = Convert.ToInt32(100 + samples.Average());
             dynamicMaxDB = adjustedDB > dynamicMaxDB ? adjustedDB : dynamicMaxDB;
 
