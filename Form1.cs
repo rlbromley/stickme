@@ -23,7 +23,7 @@ namespace stickme
 
         // audio data
         WaveInEvent audioIn = new WaveInEvent();
-        byte[] levels = new byte[6];
+        int[] levels = new int[6];
         List<double> samples = new List<double>();
         double dynamicMaxDB = double.NegativeInfinity;
 
@@ -70,6 +70,12 @@ namespace stickme
 
             animation.Interval = 5000;
             animation.Tick += Animation_Tick;
+
+            if(!Properties.Settings.Default.enablePtt)
+            {
+                // if not ptt, listen until stopped
+                startListening();
+            }
         }
 
         private void setFace(int index)
@@ -106,7 +112,7 @@ namespace stickme
 
         private void Me_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.KeyData == keyboardPTT)
+            if ((e.KeyData & keyboardPTT) == keyboardPTT)
             {
                 stopListening();
             }
@@ -158,7 +164,7 @@ namespace stickme
                 samples.RemoveAt(0);
             }
             // still not sure how to fix the math to not require an arbitrary 100 here
-            var adjustedDB = Convert.ToInt32(100 + samples.Average());
+            var adjustedDB = Convert.ToInt32(samples.Average());
             dynamicMaxDB = adjustedDB > dynamicMaxDB ? adjustedDB : dynamicMaxDB;
 
             try
@@ -190,7 +196,7 @@ namespace stickme
             var step = range / 5.0;
             for (int x = 1; x < 6; x++)
             {
-                levels[x] = Convert.ToByte(Math.Floor(floor + (step * x)));
+                levels[x] = Convert.ToInt32(Math.Floor(floor + (step * x)));
             }
         }
 
@@ -206,9 +212,10 @@ namespace stickme
             
             if(Properties.Settings.Default.dynamicMax)
             {
+                Console.Out.WriteLine($"Max\t{dynamicMaxDB}\t\tMin\t{Properties.Settings.Default.dbFloor}");
                 // recalculate levels based on highest previous recorded DB
                 calcRange(Properties.Settings.Default.dbFloor, dynamicMaxDB);
-                dynamicMaxDB = 0.0;
+                dynamicMaxDB = -100;
             }
         }
 
