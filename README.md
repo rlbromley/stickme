@@ -38,9 +38,21 @@ Currently, settings are controlled via editing the file app.config in the progra
 
    If enablePtt is true, this is the button that will trigger listening of the audio device while it is pushed.  Can be either a keyboard button or mouse button.
 
+* dbFloor
+
+   The value to be considered the minimum dB for audio input.  Considered the bottom level; below this the animation will remain in the closed state regardless of what's heard by the microphone.  Used as the lower endpoint of the dynamic range recalculation.
+
+* dbMax
+
+   The value to be considered the maximum dB for audio input.  Considered the top level; above this the animation will remain fully open regardless of intensities beyond this.  Used as the upper endpoint of the dynamic range recalculation.
+
+* dynamicMax
+
+   When set to false, the dB range used to control the frames is calculated from the floor and max upon launch and kept static.  When set to true and PTT is enabled, upon the PTT button being lifted up the max DB detected during that audio session is used with the floor to recalculate the range.
+
 # todo
 In no particular order:
 * make form transparency adjustable
 * make input device adjustable
 * create UI for managing settings
-* fix some quirks in the audio math
+* fix some quirks in the audio math - hoping the range adjustments help in that regard

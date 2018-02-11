@@ -18,13 +18,14 @@ namespace stickme
     {
         // images
         Image[] faces = new Image[6];
+        List<Tuple<Keys, Image>> animations = new List<Tuple<Keys, Image>>();
+        Timer animation = new Timer();
 
         // audio data
         WaveInEvent audioIn = new WaveInEvent();
         byte[] levels = new byte[6];
         List<double> samples = new List<double>();
-        double maxDB = 0.0;
-        double min = 70.0;
+        double dynamicMaxDB = double.NegativeInfinity;
 
         // keyboard/mouse events
         IKeyboardMouseEvents me;
@@ -44,14 +45,7 @@ namespace stickme
             faces[5] = resize(Image.FromFile(Properties.Settings.Default.openImage), 640, 360);
             pbOne.Image = faces[0];
 
-            // numbers chosen arbitrarily based on testing
-            // once in place recalculated on the fly
-            levels[0] = 70;
-            levels[1] = 78;
-            levels[2] = 84;
-            levels[3] = 90;
-            levels[4] = 96;
-            levels[5] = 102;
+            calcRange(Properties.Settings.Default.dbFloor, Properties.Settings.Default.dbMax);
 
             // subscribe to device
             audioIn.DataAvailable += AudioIn_DataAvailable;
@@ -74,14 +68,39 @@ namespace stickme
                 }
             }
 
+            animation.Interval = 5000;
+            animation.Tick += Animation_Tick;
+        }
+
+        private void setFace(int index)
+        {
+            if(!animation.Enabled)
+            {
+                pbOne.Image = faces[index];
+            }
+        }
+
+        private void setFace(Tuple<Keys, Image> face)
+        {
+            pbOne.Image = face.Item2;
+            animation.Start();
         }
 
         #region event handling
+        private void Animation_Tick(object sender, EventArgs e)
+        {
+            animation.Stop();
+        }
+
         private void Me_KeyDown(object sender, KeyEventArgs e)
         {
             if(e.KeyData == keyboardPTT)
             {
                 startListening();
+            }
+            if(animations.Any(ax => ax.Item1 == e.KeyData))
+            {
+                setFace(animations.First(ax => ax.Item1 == e.KeyData));
             }
         }
 
@@ -138,20 +157,21 @@ namespace stickme
                 // pop the oldest sample out of the list
                 samples.RemoveAt(0);
             }
+            // still not sure how to fix the math to not require an arbitrary 100 here
             var adjustedDB = Convert.ToInt32(100 + samples.Average());
-            maxDB = adjustedDB > maxDB ? adjustedDB : maxDB;
+            dynamicMaxDB = adjustedDB > dynamicMaxDB ? adjustedDB : dynamicMaxDB;
 
             try
             {
                 if (adjustedDB <= levels[0])
                 {
-                    pbOne.Image = faces[0];
+                    this.setFace(0);
                 }
                 for (int x = 1; x < levels.Length; x++)
                 {
                     if (adjustedDB <= levels[x] && adjustedDB > levels[x - 1])
                     {
-                        pbOne.Image = faces[x];
+                        this.setFace(x);
                     }
                 }
             }
@@ -164,6 +184,16 @@ namespace stickme
         }
         #endregion
 
+        private void calcRange(double floor, double ceil)
+        {
+            var range = ceil - floor;// dynamicMaxDB - Properties.Settings.Default.dbFloor;
+            var step = range / 5.0;
+            for (int x = 1; x < 6; x++)
+            {
+                levels[x] = Convert.ToByte(Math.Floor(floor + (step * x)));
+            }
+        }
+
         private void startListening()
         {
             audioIn.StartRecording();
@@ -173,16 +203,13 @@ namespace stickme
         {
             audioIn.StopRecording();
             pbOne.Image = faces[0];
-
-            // recalculate levels based on highest previous recorded DB
-            // should help with variance due to things like mic position
-            var range = maxDB - min;
-            var step = range / 5.0;
-            for (int x = 1; x < 6; x++)
+            
+            if(Properties.Settings.Default.dynamicMax)
             {
-                levels[x] = Convert.ToByte(Math.Floor(min + (step * x)));
+                // recalculate levels based on highest previous recorded DB
+                calcRange(Properties.Settings.Default.dbFloor, dynamicMaxDB);
+                dynamicMaxDB = 0.0;
             }
-            maxDB = 0.0;
         }
 
         // shamelessly stolen from SO
