@@ -106,6 +106,12 @@ namespace stickme
 
             animation.Interval = 5000;
             animation.Tick += Animation_Tick;
+
+            if(!Properties.Settings.Default.enablePtt)
+            {
+                // if not ptt, listen until stopped
+                startListening();
+            }
         }
 
         private void T_Tick(object sender, EventArgs e)
@@ -149,7 +155,7 @@ namespace stickme
 
         private void Me_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.KeyData == keyboardPTT)
+            if ((e.KeyData & keyboardPTT) == keyboardPTT)
             {
                 stopListening();
             }

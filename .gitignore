@@ -7,3 +7,5 @@
 /packages
 *.user
 /.vs/stickme/v14
+/.vs/stickme/v15/Server/sqlite3
+/.vs/stickme/v15/.suo
