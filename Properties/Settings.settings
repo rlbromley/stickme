@@ -24,7 +24,7 @@
       <Value Profile="(Default)">Middle</Value>
     </Setting>
     <Setting Name="enablePtt" Type="System.Boolean" Scope="Application">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="dbFloor" Type="System.Double" Scope="Application">
       <Value Profile="(Default)">40</Value>
@@ -34,6 +34,9 @@
     </Setting>
     <Setting Name="dynamicMax" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="deviceName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">RTX</Value>
     </Setting>
   </Settings>
 </SettingsFile>
